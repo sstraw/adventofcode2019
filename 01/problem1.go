@@ -21,12 +21,23 @@ func main() {
 
     scanner := bufio.NewScanner(file)
 
-    sum := 0
+    parta_fuel := 0
+    partb_fuel := 0
     for scanner.Scan() {
         i, err := strconv.Atoi(scanner.Text())
         if err != nil { log.Fatal(err) }
         i = (i / 3) - 2
-        sum += i
+
+        parta_fuel += i
+        partb_fuel += i
+
+        extra := (i / 3) - 2
+        for (extra > 0) {
+            partb_fuel += extra
+            extra = (extra / 3) - 2
+        }
     }
-    fmt.Printf("Sum: %v\n", sum)
+
+    fmt.Printf("Part 1a: %v\n", parta_fuel)
+    fmt.Printf("Part 1b: %v\n", partb_fuel)
 }
