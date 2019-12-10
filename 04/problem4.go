@@ -32,7 +32,8 @@ func main() {
 
     fmt.Printf("Range: %v - %v \n", low, high)
 
-    matches := make([]int, 0)
+    matches_a := make([]int, 0)
+    matches_b := make([]int, 0)
 
     for i := low; i < high; i+=1 {
         // Turn it into a list
@@ -44,21 +45,34 @@ func main() {
         j[4] = (i / 10) % 10
         j[5] = (i / 1) % 10
 
-        // Check if it matches criteria
-        if ((j[0] == j[1] ||
-             j[1] == j[2] ||
-             j[2] == j[3] ||
-             j[3] == j[4] ||
-             j[4] == j[5]) &&
-            (j[0] <= j[1] &&
+        // Criteria
+        var n [10]int
+        for _, x := range(j) {
+            n[x] += 1
+        }
+        two_only := false
+        two_or_more := false
+        for _, x := range(n) {
+            if (x == 2) {
+                two_only = true
+            }
+            if (x <= 2) {
+                two_or_more = true
+            }
+        }
+        if ((j[0] <= j[1] &&
              j[1] <= j[2] &&
              j[2] <= j[3] &&
              j[3] <= j[4] &&
              j[4] <= j[5])){
-            matches = append(matches, i)
+            if (two_only) {
+                matches_a = append(matches_a, i)
+                matches_b = append(matches_b, i)
+            } else if (two_or_more) {
+                matches_a = append(matches_a, i)
+            }
         }
-        //Generate guess based on incrementing digits
-        
     }
-    fmt.Printf("Problem 4a: %v\n", len(matches))
+    fmt.Printf("Problem 4a: %v\n", len(matches_a))
+    fmt.Printf("Problem 4b: %v\n", len(matches_b))
 }
