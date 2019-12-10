@@ -32,7 +32,15 @@ func main() {
     c := Computer(program)
     c.Input = append(c.Input, 1)
     c.Run()
-    fmt.Println(c.Output)
+    out := c.Output[len(c.Output)-1]
+    fmt.Printf("Problem 5a: %v\n", out)
+
+    c  = Computer(program)
+    c.Input = append(c.Input, 5)
+    c.Run()
+    out  = c.Output[len(c.Output)-1]
+    fmt.Printf("Problem 5b: %v\n", out)
+
 }
 
 type IntcodeComputer struct {
@@ -98,7 +106,85 @@ func (c *IntcodeComputer) Run () {
             //Output
             c.Output = append(c.Output, c.RAM[c.RAM[c.Eip+1]])
             c.Eip += 2
-        case 99:
+        case 5:
+            //Jump-if-true
+            a, b := 0, 0
+            if (mode_a == 0){
+                a = c.RAM[c.RAM[c.Eip+1]]
+            } else {
+                a = c.RAM[c.Eip+1]
+            }
+            if (mode_b == 0){
+                b = c.RAM[c.RAM[c.Eip+2]]
+            } else {
+                b = c.RAM[c.Eip+2]
+            }
+
+            if a != 0 {
+                c.Eip = b
+            } else {
+                c.Eip += 3
+            }
+        case 6:
+            //Jump-if-false
+            a, b := 0, 0
+            if (mode_a == 0){
+                a = c.RAM[c.RAM[c.Eip+1]]
+            } else {
+                a = c.RAM[c.Eip+1]
+            }
+            if (mode_b == 0){
+                b = c.RAM[c.RAM[c.Eip+2]]
+            } else {
+                b = c.RAM[c.Eip+2]
+            }
+
+            if a == 0 {
+                c.Eip = b
+            } else {
+                c.Eip += 3
+            }
+        case 7:
+            //less-than
+            a, b := 0, 0
+            if (mode_a == 0){
+                a = c.RAM[c.RAM[c.Eip+1]]
+            } else {
+                a = c.RAM[c.Eip+1]
+            }
+            if (mode_b == 0){
+                b = c.RAM[c.RAM[c.Eip+2]]
+            } else {
+                b = c.RAM[c.Eip+2]
+            }
+
+            if a < b {
+                c.RAM[c.RAM[c.Eip+3]] = 1
+            } else {
+                c.RAM[c.RAM[c.Eip+3]] = 0
+            }
+            c.Eip += 4
+        case 8:
+            //less-than
+            a, b := 0, 0
+            if (mode_a == 0){
+                a = c.RAM[c.RAM[c.Eip+1]]
+            } else {
+                a = c.RAM[c.Eip+1]
+            }
+            if (mode_b == 0){
+                b = c.RAM[c.RAM[c.Eip+2]]
+            } else {
+                b = c.RAM[c.Eip+2]
+            }
+
+            if a == b {
+                c.RAM[c.RAM[c.Eip+3]] = 1
+            } else {
+                c.RAM[c.RAM[c.Eip+3]] = 0
+            }
+            c.Eip += 4
+         case 99:
             return
         default:
             return
