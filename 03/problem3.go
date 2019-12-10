@@ -13,6 +13,7 @@ import (
 type Coord struct {
     X int
     Y int
+    D int
 }
 
 func main() {
@@ -38,7 +39,8 @@ func main() {
     wiremap2 := MapWire(wire2)
     fmt.Printf("Wiremap2: %v\n", len(wiremap2))
 
-    distance := 0
+    distance    := 0
+    distance_3b := 0
     for _, w1 := range(wiremap1){
         for _, w2 := range(wiremap2){
             if (w1.X == w2.X &&
@@ -47,15 +49,19 @@ func main() {
                     if (distance == 0 || t_distance < distance) {
                         distance = t_distance
                     }
+                    if (distance_3b == 0 || (w1.D + w2.D) < distance_3b) {
+                        distance_3b = w1.D + w2.D
+                    }
             }
         }
     }
     fmt.Printf("Problem 3a: %v\n", distance)
+    fmt.Printf("Problem 3b: %v\n", distance_3b)
 }
 
 func MapWire(path []string) []Coord {
     coords := make([]Coord, 0)
-    x, y   := 0, 0
+    x, y, d:= 0, 0, 0
     for _, instruct := range(path){
         dx, dy    := 0, 0
         steps, _  := strconv.Atoi(instruct[1:])
@@ -74,7 +80,8 @@ func MapWire(path []string) []Coord {
         for i:=0; i < steps; i++ {
             x += dx
             y += dy
-            coords = append(coords, Coord{x,y})
+            d += 1
+            coords = append(coords, Coord{x,y, d})
         }
     }
     return coords
