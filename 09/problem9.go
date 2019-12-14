@@ -33,6 +33,11 @@ func main() {
     c.Input <- 1
     c.Run()
     fmt.Println("Problem 9a:", c.ExitCode)
+
+    c  = Computer(program)
+    c.Input <- 2
+    c.Run()
+    fmt.Println("Problem 9b:", c.ExitCode)
 }
 
 // Perm calls f with each permutation of a.
