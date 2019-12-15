@@ -36,6 +36,42 @@ func main() {
         n_squares += len(ym)
     }
     fmt.Println("Problem 11a:", n_squares)
+
+    r  = NewPaintRobot(program)
+    r.H.WriteSquare(0, 0, 1)
+    r.Run()
+    min_x, max_x, min_y, max_y := 0, 0, 0, 0
+    for x, xm := range(r.H.P){
+        if x < min_x {
+            min_x = x
+        }
+        if x > max_x {
+            max_x = x
+        }
+        for y, _ := range(xm){
+            if y < min_y {
+                min_y = y
+            }
+            if y > max_y {
+                max_y = y
+            }
+        }
+    }
+
+    fmt.Println("Problem 11b:")
+    for y := max_y; y >= min_y; y -= 1 {
+        for x := min_x; x <= max_x; x++ {
+            switch r.H.ReadSquare(x, y){
+            case 0:
+                fmt.Print(" ")
+            case 1:
+                fmt.Print("X")
+            default:
+                log.Fatal("Shouldn't be here")
+            }
+        }
+        fmt.Println()
+    }
 }
 
 type PaintRobot struct {
