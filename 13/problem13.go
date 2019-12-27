@@ -41,38 +41,92 @@ func main() {
         }
     }
     fmt.Println("Problem 13a:", sum)
+
+    ac = NewArcadeCabinet(program)
+    ac.Computer.ROM[0] = 2
+    go ac.PlayGame()
+    ac.Computer.Running = true
+    for ac.Computer.Running {
+        mv := ac.Bx-ac.Px
+        if mv < 0 {
+            mv = -1
+        } else if mv > 0 {
+            mv = 1
+        } else {
+            mv = 0
+        }
+        ac.Computer.Input <- mv
+        fmt.Println(ac.ScreenS())
+    }
+    fmt.Println("Problem 13b:", ac.Score)
 }
 
 type ArcadeCabinet struct {
-    Screen map[int]map[int]int
+    Screen [24][42]int
     Computer *IntcodeComputer
+    Score int
+    Bx, By, Px, Py int
 }
 
 func NewArcadeCabinet(p []int) *ArcadeCabinet {
     return &ArcadeCabinet{
-        Screen: make(map[int]map[int]int, 0),
         Computer: NewComputer(p),
     }
 }
 
 func (ac *ArcadeCabinet) SetScreen (x, y, t int) {
-    if xm, ok := ac.Screen[x]; ok {
-        xm[y] = t
+    if x == -1 && y == 0 {
+        ac.Score = t
     } else {
-        ac.Screen[x]    = make(map[int]int, 0)
-        ac.Screen[x][y] = t
+        if ac.Screen[y][x] == 2 && t == 0 {
+            fmt.Println("break", "y", y, "x", x)
+        } else if t == 3 {
+            ac.Px = x
+            ac.Py = y
+        } else if t == 4 {
+            ac.Bx = x
+            ac.By = y
+        }
+        ac.Screen[y][x] = t
     }
 }
 
 func (ac *ArcadeCabinet) PlayGame() {
     ac.Computer.Running = true
     go ac.Computer.Run()
-    for ac.Computer.Running {
-        tx := <-ac.Computer.Output
-        ty := <-ac.Computer.Output
-        tt := <-ac.Computer.Output
-        ac.SetScreen(tx, ty, tt)
+    var scrcmd [3]int
+    for i := 0; ac.Computer.Running; i = (i + 1) % 3 {
+        scrcmd[i] = <-ac.Computer.Output
+        if i == 2 {
+            ac.SetScreen(
+                scrcmd[0],
+                scrcmd[1],
+                scrcmd[2],
+            )
+        }
     }
+}
+
+func (ac *ArcadeCabinet) ScreenS() string {
+    s := fmt.Sprintf("Score: %v\n", ac.Score)
+    for _, row := range(ac.Screen) {
+        for _, val := range(row) {
+            switch val {
+            case 0:
+                s += " "
+            case 1:
+                s += "#"
+            case 2:
+                s += "+"
+            case 3:
+                s += "T"
+            case 4:
+                s += "o"
+            }
+        }
+        s += "\n"
+    }
+    return s
 }
 
 type IntcodeComputer struct {
@@ -94,6 +148,31 @@ type Instruction struct {
     A      int
     B      int
     C      int
+}
+
+func (i Instruction) String() string {
+    var s_opcode string
+    switch i.Opcode {
+    case 1:
+        s_opcode = "add"
+    case 2:
+        s_opcode = "mult"
+    case 3:
+        s_opcode = "input"
+    case 4:
+        s_opcode = "output"
+    case 5:
+        s_opcode = "jt"
+    case 6:
+        s_opcode = "jf"
+    case 7:
+        s_opcode = "lt"
+    case 8:
+        s_opcode = "eq"
+    case 9:
+        s_opcode = "adjbase"
+    }
+    return fmt.Sprintf("%v %v %v %v", s_opcode, i.A, i.B, i.C)
 }
 
 func (c *IntcodeComputer) GetOperation(eip int) (*Instruction) {
@@ -126,6 +205,7 @@ func (c *IntcodeComputer) GetOperation(eip int) (*Instruction) {
     }
 
     inst := & Instruction{opcode, vals[0], vals[1], vals[2]}
+    //fmt.Println(c.Eip, inst)
     return inst
 }
 
@@ -133,8 +213,8 @@ func NewComputer (code []int) (*IntcodeComputer){
     c    := &IntcodeComputer{Eip: 0, Running: false, RelBase: 0}
     c.ROM = make([]int, len(code))
     copy(c.ROM, code)
-    c.Input  = make(chan int, 1)
-    c.Output = make(chan int, 2)
+    c.Input  = make(chan int)
+    c.Output = make(chan int)
     c.RAM = make([]int, len(code)*999)
     copy(c.RAM, code)
     return c
