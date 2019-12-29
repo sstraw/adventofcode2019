@@ -67,8 +67,38 @@ func main() {
     }
 
     // 14a
+    ore := CalculateOre(ord_recipes, 1)
+    fmt.Println("Problem 14a:", ore)
+
+    // 14b
+    // Doing a binary search
+    tril := 1000000000000
+    high := tril
+    low  := 1
+
+    for high-low > 1 {
+        mid := (high + low) / 2
+        ore = CalculateOre(ord_recipes, mid)
+        if ore < tril {
+            low = mid
+        } else if ore > tril {
+            high = mid
+        } else {
+            break
+        }
+    }
+    fmt.Println("Problem 14b:", low)
+}
+
+type Recipe struct {
+    Amount int
+    Name string
+    Components map[string]int
+}
+
+func CalculateOre (ord_recipes []*Recipe, fuel int) int {
     chem_need := make(map[string]int, 0)
-    chem_need["FUEL"] = 1
+    chem_need["FUEL"] = fuel
     for i := len(ord_recipes) - 1; i >= 0; i-- {
         r    := ord_recipes[i]
         mult := chem_need[r.Name] / r.Amount
@@ -82,27 +112,7 @@ func main() {
             chem_need[cs] += cn * mult
         }
     }
-    fmt.Println("Problem 14a:", chem_need["ORE"])
-}
-
-type Recipe struct {
-    Amount int
-    Name string
-    Components map[string]int
-}
-
-type Nanofactory struct {
-    Requirements map[string]int
-    Chemicals []string //List of all components sorted by dependencies
-    Recipes map[string]*Recipe
-}
-
-func NewNanofactory () *Nanofactory {
-    return &Nanofactory {
-        Requirements: make(map[string]int, 0),
-        Chemicals: make([]string, 0),
-        Recipes: make(map[string]*Recipe, 0),
-    }
+    return chem_need["ORE"]
 }
 
 func ParseIngredient(s string) (string, int) {
