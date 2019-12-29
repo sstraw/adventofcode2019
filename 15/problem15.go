@@ -34,6 +34,7 @@ func main() {
     m.Explore()
     fmt.Println(m)
     fmt.Println("Problem 15a:", m.Grid[m.OxY][m.OxX].Distance)
+    fmt.Println("Problem 15b:", m.Oxygenize())
 }
 
 func (m *Map) Explore () {
@@ -98,13 +99,45 @@ func (m *Map) Explore () {
     }
 }
 
+func (m *Map) Oxygenize () int {
+    tick := 0
+    m.Grid[m.OxY][m.OxX].Value = 2
+    fill := true
+    for ; fill; tick++ {
+        // Tracks if we're still spreading
+        fill = false
+        squares := make([]*Square, 0)
+        for y, row := range(m.Grid) {
+            for x, sq := range(row) {
+                if sq.Value != 2 {
+                    continue
+                }
+                for i := 1; i < 5; i++ {
+                    dx, dy := Move(i)
+                    t_sq := &m.Grid[y+dy][x+dx]
+                    squares = append(squares, t_sq)
+                }
+            }
+        }
+        for _, sq := range(squares) {
+            if sq.Value == 0 {
+                fill = true
+                sq.Value = 2
+            }
+        }
+    }
+    // Subtract one because technically, the last tick we were already fully
+    // oxygenized
+    return tick-1
+}
+
 type Square struct {
     Value    int
     Distance int
 }
 
 type Map struct {
-    Grid   [50][50]Square
+    Grid   [53][50]Square
     OxX, OxY       int
     Drone Drone
 }
@@ -128,6 +161,8 @@ func (m Map) String() string {
                     s += " "
                 case 1:
                     s += "#"
+                case 2:
+                    s += "."
                 }
             }
         }
